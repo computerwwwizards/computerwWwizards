@@ -2,10 +2,10 @@ export type Identifier = string | symbol | number
 
 export type PlainObject = Record<Identifier, any>
 
-export interface Container<ResultsByIdentifier extends PlainObject> {
+export interface IContainer<ResultsByIdentifier extends PlainObject> {
   bindTo<T extends keyof ResultsByIdentifier>(
     identifier: T,
-    provider: (ctx: Container<ResultsByIdentifier>) => ResultsByIdentifier[T],
+    provider: (ctx: IContainer<ResultsByIdentifier>) => ResultsByIdentifier[T],
     scope?: 'singleton' | 'trasient'
   ): this;
   get<T extends keyof ResultsByIdentifier, R extends boolean = true>(
@@ -14,7 +14,7 @@ export interface Container<ResultsByIdentifier extends PlainObject> {
   ): R extends false ? ResultsByIdentifier[T] | undefined : ResultsByIdentifier[T]
 }
 
-type Provider<R extends PlainObject, T extends keyof R> = (ctx: Container<R>) => R[T];
+type Provider<R extends PlainObject, T extends keyof R> = (ctx: IContainer<R>) => R[T];
 
 interface Binding<R extends PlainObject, T extends keyof R> {
   provider: Provider<R, T>;
@@ -22,12 +22,12 @@ interface Binding<R extends PlainObject, T extends keyof R> {
   instance?: R[T];
 }
 
-export class DIContainer<ResultsByIdentifier extends PlainObject> implements Container<ResultsByIdentifier> {
+class LiteContainer<ResultsByIdentifier extends PlainObject> implements IContainer<ResultsByIdentifier> {
   private bindings = new Map<keyof ResultsByIdentifier, Binding<ResultsByIdentifier, any>>();
 
   bindTo<T extends keyof ResultsByIdentifier>(
     identifier: T,
-    provider: (ctx: Container<ResultsByIdentifier>) => ResultsByIdentifier[T],
+    provider: (ctx: IContainer<ResultsByIdentifier>) => ResultsByIdentifier[T],
     scope: 'singleton' | 'trasient' = 'trasient'
   ): this {
     this.bindings.set(identifier, { provider, scope });
@@ -54,3 +54,5 @@ export class DIContainer<ResultsByIdentifier extends PlainObject> implements Con
     return binding.provider(this);
   }
 }
+
+export default LiteContainer
