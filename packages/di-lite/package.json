@@ -3,15 +3,18 @@
   "name": "@computerwwwizards/di-lite",
   "version": "1.0.0",
   "type": "module",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "require": "./dist/index.cjs"
-    }
+  "publishConfig": {
+    "exports": {
+      ".": {
+        "types": "./dist/index.d.ts",
+        "import": "./dist/index.js",
+        "require": "./dist/index.cjs"
+      }
+    },
+    "main": "./dist/index.cjs",
+    "types": "./dist/index.d.ts"
   },
-  "main": "./dist/index.cjs",
-  "types": "./dist/index.d.ts",
+  "main": "./src/index.ts",
   "files": [
     "dist"
   ],
@@ -29,5 +32,5 @@
     "typescript": "^5.9.2",
     "vitest": "^3.2.4"
   },
-  "private": true
+  "private": false
 }

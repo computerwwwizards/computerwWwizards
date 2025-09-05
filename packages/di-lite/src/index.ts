@@ -2,16 +2,16 @@ export type Identifier = string | symbol | number
 
 export type PlainObject = Record<Identifier, any>
 
-export interface Container<ResultsByIdentifier extends PlainObject >{
+export interface Container<ResultsByIdentifier extends PlainObject> {
   bindTo<T extends keyof ResultsByIdentifier>(
     identifier: T,
-    provider: (ctx: Container<ResultsByIdentifier>)=>ResultsByIdentifier[T],
+    provider: (ctx: Container<ResultsByIdentifier>) => ResultsByIdentifier[T],
     scope?: 'singleton' | 'trasient'
   ): this;
-  get<T extends keyof ResultsByIdentifier, R extends boolean>(
+  get<T extends keyof ResultsByIdentifier, R extends boolean = true>(
     identifier: T,
     throwIfNull?: R
-  ): R extends false? ResultsByIdentifier[T]: ResultsByIdentifier[T] | undefined
+  ): R extends false ? ResultsByIdentifier[T] | undefined : ResultsByIdentifier[T]
 }
 
 type Provider<R extends PlainObject, T extends keyof R> = (ctx: Container<R>) => R[T];
@@ -34,7 +34,7 @@ export class DIContainer<ResultsByIdentifier extends PlainObject> implements Con
     return this;
   }
 
-  get<T extends keyof ResultsByIdentifier, R extends boolean>(
+  get<T extends keyof ResultsByIdentifier, R extends boolean = true>(
     identifier: T,
     throwIfNull: R = true as R
   ): R extends false ? ResultsByIdentifier[T] | undefined : ResultsByIdentifier[T] {
@@ -48,10 +48,7 @@ export class DIContainer<ResultsByIdentifier extends PlainObject> implements Con
     }
 
     if (binding.scope === 'singleton') {
-      if (!binding.instance) {
-        binding.instance = binding.provider(this);
-      }
-      return binding.instance;
+      return binding.instance ??= binding.provider(this);
     }
 
     return binding.provider(this);

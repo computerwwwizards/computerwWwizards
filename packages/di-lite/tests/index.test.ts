@@ -8,14 +8,14 @@ interface Dependencies {
 }
 
 class ServiceA {
-  constructor(public config: { host: string }) {}
+  constructor(public config: { host: string }) { }
   greet() {
     return `Hello from ServiceA on ${this.config.host}`;
   }
 }
 
 class ServiceB {
-  constructor(private serviceA: ServiceA) {}
+  constructor(private serviceA: ServiceA) { }
   doSomething() {
     return this.serviceA.greet().replace('ServiceA', 'ServiceB');
   }
@@ -64,7 +64,7 @@ describe('DIContainer', () => {
   it('should resolve dependencies that depend on other dependencies', () => {
     const container = new DIContainer<Dependencies>();
     container.bindTo('config', () => ({ host: 'computerwizards.io' }), 'singleton');
-    container.bindTo('serviceA', (ctx) => new ServiceA(ctx.get('config')), 'singleton');
+    container.bindTo('serviceA', (ctx) => new ServiceA(ctx.get('config')), 'singleton',);
     container.bindTo('serviceB', (ctx) => new ServiceB(ctx.get('serviceA')), 'singleton');
 
     const serviceB = container.get('serviceB');
