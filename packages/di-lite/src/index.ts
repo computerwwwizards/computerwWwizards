@@ -2,57 +2,58 @@ export type Identifier = string | symbol | number
 
 export type PlainObject = Record<Identifier, any>
 
-export interface IContainer<ResultsByIdentifier extends PlainObject> {
+export type ProviderFn<ResultsByIdentifier extends PlainObject, T extends keyof ResultsByIdentifier> =  (ctx: MinimalContainer<ResultsByIdentifier>)=>ResultsByIdentifier[T]
+
+export interface MinimalContainer<ResultsByIdentifier extends PlainObject >{
   bindTo<T extends keyof ResultsByIdentifier>(
-    identifier: T,
-    provider: (ctx: IContainer<ResultsByIdentifier>) => ResultsByIdentifier[T],
+    identifier: T, 
+    provider: ProviderFn<ResultsByIdentifier, T>,
     scope?: 'singleton' | 'trasient'
   ): this;
-  get<T extends keyof ResultsByIdentifier, R extends boolean = true>(
-    identifier: T,
+  get<T extends keyof ResultsByIdentifier, R extends boolean>(
+    identifier: T, 
     throwIfNull?: R
-  ): R extends false ? ResultsByIdentifier[T] | undefined : ResultsByIdentifier[T]
+  ): R extends false? ResultsByIdentifier[T]: ResultsByIdentifier[T] | undefined
 }
 
-type Provider<R extends PlainObject, T extends keyof R> = (ctx: IContainer<R>) => R[T];
+export class Container<ResultsbyIdentifier extends  PlainObject> implements 
+  MinimalContainer<ResultsbyIdentifier>
+{
+  constructor(private readonly registry = new Map<
+    keyof ResultsbyIdentifier, 
+    {
+      provider: (ctx: Container<ResultsbyIdentifier>)=>any
+      scope: 'singleton' | 'trasient',
+      reference?: any
+    }
+  >()){}
 
-interface Binding<R extends PlainObject, T extends keyof R> {
-  provider: Provider<R, T>;
-  scope: 'singleton' | 'trasient';
-  instance?: R[T];
-}
-
-class LiteContainer<ResultsByIdentifier extends PlainObject> implements IContainer<ResultsByIdentifier> {
-  private bindings = new Map<keyof ResultsByIdentifier, Binding<ResultsByIdentifier, any>>();
-
-  bindTo<T extends keyof ResultsByIdentifier>(
-    identifier: T,
-    provider: (ctx: IContainer<ResultsByIdentifier>) => ResultsByIdentifier[T],
+  bindTo<T extends keyof ResultsbyIdentifier>(
+    identifier: T, 
+    provider: (ctx: Container<ResultsbyIdentifier>) => ResultsbyIdentifier[T],
     scope: 'singleton' | 'trasient' = 'trasient'
-  ): this {
-    this.bindings.set(identifier, { provider, scope });
+  ) {
+    const value = {provider, reference: undefined, scope}
+
+    this.registry.set(identifier, value)
+
     return this;
   }
 
-  get<T extends keyof ResultsByIdentifier, R extends boolean = true>(
-    identifier: T,
-    throwIfNull: R = true as R
-  ): R extends false ? ResultsByIdentifier[T] | undefined : ResultsByIdentifier[T] {
-    const binding = this.bindings.get(identifier);
-
-    if (!binding) {
-      if (throwIfNull) {
-        throw new Error(`No binding for ${identifier.toString()}`);
-      }
-      return undefined as any;
-    }
-
-    if (binding.scope === 'singleton') {
-      return binding.instance ??= binding.provider(this);
-    }
-
-    return binding.provider(this);
+  get<T extends keyof ResultsbyIdentifier, R extends boolean>(
+    identifier: T, 
+    doNotThrowIIfNull?: R | undefined
+  ){
+    const maybeValue = this.registry.get(identifier)
+    const maybeProvider = maybeValue?.provider;
+      
+    if(!maybeProvider && !doNotThrowIIfNull)
+      throw new Error(`Could not resolve ${String(identifier)}, did you register?`)
+    
+    if(maybeValue?.scope === 'singleton')
+      maybeValue.reference ??= maybeProvider?.(this)
+    
+    return maybeValue?.scope === 'singleton' ? maybeValue.reference : maybeProvider?.(this);
   }
 }
 
-export default LiteContainer
