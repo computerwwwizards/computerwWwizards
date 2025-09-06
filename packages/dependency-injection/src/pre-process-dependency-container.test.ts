@@ -17,9 +17,9 @@ describe('PreProcessDependencyContainer', () => {
         { identifier: 'firstNumber'},
         { identifier: 'secondNumber'}
       ]),
-      provider: (resolved) => {
+      provider: (resolved: (number| undefined)[]) => {
 
-    const [first, second] = resolved as unknown as number[]
+    const [first = 0, second = 0] = resolved
     return first + second
       }
     })
@@ -43,7 +43,7 @@ describe('PreProcessDependencyContainer', () => {
       provider: (resolved) => resolved
     })
 
-  const bag = container.get('bag') as { firstNumber: number; secondNumber: number }
+  const bag = container.get('bag')
 
   expect(bag.firstNumber).toBe(5)
   expect(bag.secondNumber).toBe(7)
