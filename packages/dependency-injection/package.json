@@ -1,6 +1,6 @@
 {
   "license": "MIT",
-  "name": "@computerwwwizards/di-lite",
+  "name": "@computerwwwizards/dependency-injection",
   "version": "1.0.0",
   "type": "module",
   "publishConfig": {
