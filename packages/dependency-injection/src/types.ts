@@ -16,7 +16,8 @@ export interface IPrimitiveContainer<ResultsByIdentifier extends PlainObject >{
     identifier: T, 
     throwIfNull?: R,
     meta?: any
-  ): R extends false? ResultsByIdentifier[T]: ResultsByIdentifier[T] | undefined
+  ): R extends false? ResultsByIdentifier[T]: ResultsByIdentifier[T] | undefined;
+  unbind(identifier: keyof ResultsByIdentifier): this;
 }
 
 
