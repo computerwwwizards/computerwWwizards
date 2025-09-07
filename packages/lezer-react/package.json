@@ -52,5 +52,5 @@
     "@lezer/highlight": "^1.2.1",
     "@lezer/javascript": "^1.5.2"
   },
-  "private": true
+  "private": false
 }
