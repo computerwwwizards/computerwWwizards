@@ -45,5 +45,11 @@ export class PrimitiveContainer<
       maybeValue.reference : 
       maybeProvider?.(this);
   }
+
+  unbind(identifier: keyof ResultsbyIdentifier): this {
+    this.registry.delete(identifier);
+    
+    return this;
+  }
 }
 
