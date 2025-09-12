@@ -46,12 +46,10 @@ describe('createWithUse mixin creator', () => {
 
     const plugin1 = (c: IPrimitiveContainer<Services>) => {
       c.bindTo('service1', () => 'test1');
-      return c;
     };
 
     const plugin2 = (c: IPrimitiveContainer<Services>) => {
       c.bindTo('service2', () => 42);
-      return c;
     };
 
     const result = container.use(plugin1, plugin2);
@@ -72,17 +70,14 @@ describe('createWithUse mixin creator', () => {
 
     const configPlugin = (c: IPrimitiveContainer<Services>) => {
       c.bindTo('config', () => ({ env: 'test' }));
-      return c;
     };
 
     const loggerPlugin = (c: IPrimitiveContainer<Services>) => {
       c.bindTo('logger', () => ({ log: vi.fn() }));
-      return c;
     };
 
     const cachePlugin = (c: IPrimitiveContainer<Services>) => {
       c.bindTo('cache', () => new Map());
-      return c;
     };
 
     container.use(configPlugin, loggerPlugin, cachePlugin);
@@ -124,7 +119,6 @@ describe('PrimitiveContainerWithUse', () => {
           connect: () => console.log(`Connecting to ${config.dbUrl}`)
         };
       });
-      return c;
     };
 
     const userServicePlugin = (c: IPrimitiveContainer<Services>) => {
@@ -137,7 +131,6 @@ describe('PrimitiveContainerWithUse', () => {
           }
         };
       });
-      return c;
     };
 
     container.use(databasePlugin, userServicePlugin);
@@ -163,7 +156,6 @@ describe('PrimitiveContainerWithUse', () => {
           increment: function() { this.value++; }
         };
       }, 'singleton');
-      return c;
     };
 
     container.use(counterPlugin);
