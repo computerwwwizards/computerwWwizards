@@ -20,6 +20,15 @@ Most DI libraries are heavy, opinionated, and rely on TypeScript decorators or p
 
 This package solves those problems by being minimal, explicit, and callback-driven. You get all the flexibility, none of the headaches.
 
+## What's included
+
+- **`PrimitiveContainer`**: Basic DI container with `bindTo()`, `get()`, `unbind()`
+- **`PrimitiveContainerWithUse`**: Same as above + `use()` method for plugins
+- **`PreProcessDependencyContainer`**: Advanced container with dependency resolution via `bind()`
+- **`PreProcessDependencyContainerWithUse`**: Advanced container + `use()` method for plugins  
+- **`createWithUse()`**: Mixin function to add `use()` method to any container class
+- **Helper functions**: `createAutoResolver`, `createAutoResolveDepsInOrder` for common dependency patterns
+
 ## Quick Start (Copy-paste friendly!)
 
 ### Basic usage: PrimitiveContainer
@@ -62,6 +71,114 @@ const service = container.get('service')
 service.doSomething() // 'info true'
 ```
 
+### Plugin/Middleware Pattern: Containers with use()
+
+For modular dependency registration, use the containers with the `use()` method:
+
+```ts
+import { PrimitiveContainerWithUse, PreProcessDependencyContainerWithUse } from '@computerwwwizards/dependency-injection'
+
+// Basic container with plugin support
+const container = new PrimitiveContainerWithUse<{
+  config: { apiUrl: string }
+  logger: { log: (msg: string) => void }
+  httpClient: { get: (path: string) => Promise<any> }
+}>()
+
+// Create modular plugins
+const configPlugin = (c) => {
+  c.bindTo('config', () => ({ apiUrl: 'https://api.example.com' }), 'singleton')
+  return c
+}
+
+const loggingPlugin = (c) => {
+  c.bindTo('logger', () => ({ log: console.log }), 'singleton')
+  return c
+}
+
+const httpPlugin = (c) => {
+  c.bindTo('httpClient', (ctx) => {
+    const config = ctx.get('config')
+    return {
+      get: async (path) => fetch(`${config.apiUrl}${path}`).then(r => r.json())
+    }
+  })
+  return c
+}
+
+// Use plugins to configure the container
+container.use(configPlugin, loggingPlugin, httpPlugin)
+
+// Now everything is ready
+const client = container.get('httpClient')
+const data = await client.get('/users')
+```
+
+### Advanced: PreProcessDependencyContainer with Plugins
+
+```ts
+import { PreProcessDependencyContainerWithUse, createAutoResolver } from '@computerwwwizards/dependency-injection'
+
+const container = new PreProcessDependencyContainerWithUse<{
+  database: { query: (sql: string) => any[] }
+  logger: { log: (msg: string) => void }
+  userService: { findUser: (id: string) => any }
+}>()
+
+const databasePlugin = (c) => {
+  c.bindTo('database', () => ({ query: (sql) => [] }), 'singleton')
+  return c
+}
+
+const loggingPlugin = (c) => {
+  c.bindTo('logger', () => ({ log: console.log }), 'singleton')  
+  return c
+}
+
+const userServicePlugin = (c) => {
+  c.bind('userService', {
+    resolveDependencies: createAutoResolver([
+      { identifier: 'database' },
+      { identifier: 'logger' }
+    ]),
+    provider: (deps) => ({
+      findUser: (id) => {
+        deps.logger.log(`Finding user ${id}`)
+        return deps.database.query(`SELECT * FROM users WHERE id = ${id}`)[0]
+      }
+    })
+  })
+  return c
+}
+
+// Chain plugins together
+container.use(databasePlugin, loggingPlugin, userServicePlugin)
+
+const userService = container.get('userService')
+const user = userService.findUser('123')
+```
+
+### Custom Mixins: createWithUse
+
+Create your own container classes with plugin support:
+
+```ts
+import { createWithUse, PrimitiveContainer, PreProcessDependencyContainer } from '@computerwwwizards/dependency-injection'
+
+// Create a custom container class with use() method
+const MyCustomContainerWithUse = createWithUse(PrimitiveContainer)
+
+// Or with the advanced container
+const MyAdvancedContainerWithUse = createWithUse(PreProcessDependencyContainer)
+
+// Use it like any other container
+const container = new MyCustomContainerWithUse<{ service: string }>()
+container.use((c) => {
+  c.bindTo('service', () => 'Hello World!')
+  return c
+})
+```
+
 ### Pro tip: Unbind when you want to clean up
 
 ```ts
@@ -99,8 +216,37 @@ container.bind('serviceObj', {
 - **Works everywhere**: Browser, Node, and with module federation
 - **No forced class patterns or decorators**: Use functions, objects, whatever you want
 - **You control dependency graph and lifecycle**: Explicit is better than implicit
+- **Modular plugin system**: Use the `use()` method to create reusable, composable dependency modules
+- **Flexible mixin pattern**: Create custom container classes with `createWithUse()`
 
 ## Common patterns and tips
+
+### Modular plugins for reusability
+```ts
+// ✅ Create reusable plugins for common functionality
+const databasePlugin = (dbUrl: string) => (container) => {
+  container.bindTo('database', () => createDatabaseConnection(dbUrl), 'singleton')
+  return container
+}
+
+const loggerPlugin = (level: string) => (container) => {
+  container.bindTo('logger', () => createLogger(level), 'singleton')
+  return container
+}
+
+// Use across different containers
+const devContainer = new PrimitiveContainerWithUse()
+devContainer.use(
+  databasePlugin('sqlite://dev.db'),
+  loggerPlugin('debug')
+)
+
+const prodContainer = new PrimitiveContainerWithUse()
+prodContainer.use(
+  databasePlugin('postgres://prod-db'),
+  loggerPlugin('error')
+)
+```
 
 ### Memory-friendly approach: Use the container context
 ```ts
@@ -131,6 +277,8 @@ const maybeValue = container.get('notRegistered', true) // returns undefined
 
 ## Roadmap
 
+- [x] Plugin/middleware pattern with `use()` method
+- [x] Mixin creator function `createWithUse()`
 - [ ] Error handling strategies (circular dep detection, error callbacks)
 - [ ] Lifecycle hooks (init/dispose, lazy activation)
 - [ ] Child container creation (inherit/override bindings)

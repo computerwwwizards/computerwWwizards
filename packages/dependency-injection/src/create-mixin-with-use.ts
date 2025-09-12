@@ -13,7 +13,7 @@ export function createWithUse<TBase extends Constructor<IPrimitiveContainer<any>
     
     use<Register extends PlainObject>(
       this: IPrimitiveContainer<Register>,
-      ...handlers: Array<(container: IPrimitiveContainer<Register>) => IPrimitiveContainer<Register>>
+      ...handlers: Array<(container: IPrimitiveContainer<Register>) => void>
     ): ContainerWithPlugins<Register, IPrimitiveContainer<Register>> {
       handlers.forEach((handler) => handler(this));
       
