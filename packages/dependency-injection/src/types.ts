@@ -6,17 +6,28 @@ export type ProviderFn<
   ResultsByIdentifier extends PlainObject, T extends keyof ResultsByIdentifier
 > =  (ctx: IPrimitiveContainer<ResultsByIdentifier>)=>ResultsByIdentifier[T]
 
+
+
+export type ContainerWithPlugins<
+  T extends PlainObject, 
+  ContainerType extends IPrimitiveContainer<T>
+> = ContainerType & {
+  use(
+    ...handlers: ((container: ContainerType)=>ContainerType)[]
+  ): ContainerWithPlugins<T, ContainerType>;
+}
+
 export interface IPrimitiveContainer<ResultsByIdentifier extends PlainObject >{
   bindTo<T extends keyof ResultsByIdentifier>(
     identifier: T, 
     provider: ProviderFn<ResultsByIdentifier, T>,
     scope?: 'singleton' | 'transient'
   ): this;
-  get<T extends keyof ResultsByIdentifier, R extends boolean>(
+  get<T extends keyof ResultsByIdentifier, R extends boolean = false>(
     identifier: T, 
-    throwIfNull?: R,
+    doNotThrowIfNull?: R,
     meta?: any
-  ): R extends false? ResultsByIdentifier[T]: ResultsByIdentifier[T] | undefined;
+  ): R extends true ? ResultsByIdentifier[T] | undefined : ResultsByIdentifier[T];
   unbind(identifier: keyof ResultsByIdentifier): this;
 }
 

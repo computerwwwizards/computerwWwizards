@@ -192,7 +192,7 @@ store.subscribe(value => {
 - **Enhanced Mutable Operations**: Plan to add more utilities for direct mutation, batch mutation, and fine-grained control over how state is changed and emitted.
 - **Plugin System**: Add support for plugins that can intercept, filter, or transform values before they reach subscribers. Plugins may also filter which callbacks/subscribers are executed, allowing for advanced control over notification logic (e.g., only notify certain subscribers based on value or context). This enables features like logging, filtering, or custom processing without changing client code. We are also planning to evaluate rough points between RxJS and this library, and create plugins to add stream support (such as filtering, mapping, and reactive pipelines) if needed.
 - **Lazy Subscribers**: Support subscribers that can be created ahead of time and work with a fallback value if no emitter is available. This enables more flexible state sharing and decoupling between emitters and subscribers, useful for multi-framework or async scenarios.
-
+- **Api**: naming is somewhat weird, like update maybe is a bad decision and a better one is emit. Maybe also separate concerns and create observables and observer separated and a event bus to agregate models and emisions
 ## License
 
 MIT
