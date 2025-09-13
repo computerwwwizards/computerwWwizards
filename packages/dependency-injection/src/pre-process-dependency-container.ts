@@ -1,5 +1,6 @@
 import { PrimitiveContainer } from "./primitive-container";
 import { BindOptions, IPreProcessDependencyContainer, PlainObject } from "./types";
+import { createWithUse } from "./create-mixin-with-use";
 
 export class PreProcessDependencyContainer <
   Register extends PlainObject
@@ -31,6 +32,8 @@ implements IPreProcessDependencyContainer<Register>
     }, scope)
   }
 }
+
+export const PreProcessDependencyContainerWithUse = createWithUse(PreProcessDependencyContainer)
 
 export const createAutoResolveDepsInOrder = <T extends PlainObject>(
   deps: ({identifier:keyof T, dontThrowIfNull?: boolean})[]

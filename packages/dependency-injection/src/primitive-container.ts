@@ -1,4 +1,5 @@
-import { IPrimitiveContainer, PlainObject } from "./types";
+import { createWithUse } from "./create-mixin-with-use";
+import { ContainerWithPlugins, IPrimitiveContainer, PlainObject } from "./types";
 
 export class PrimitiveContainer<
   ResultsbyIdentifier extends  PlainObject
@@ -52,4 +53,7 @@ export class PrimitiveContainer<
     return this;
   }
 }
+
+
+export const PrimitiveContainerWithUse = createWithUse(PrimitiveContainer)
 

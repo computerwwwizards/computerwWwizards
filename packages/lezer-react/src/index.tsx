@@ -6,6 +6,7 @@ import { ComponentProps, type ReactNode, useMemo } from "react";
 export interface CodeBlockProps extends ComponentProps<'pre'>{
   code: string;
   language?: 'js' | 'css' | 'tsx' | 'jsx' | 'ts',
+  parser?: typeof parser;
 }
 
 export interface UseGetLezerNodesOptions {
@@ -17,7 +18,7 @@ export interface UseGetLezerNodesOptions {
 export function useGetLezerNodes({
   code,
   highlighter = classHighlighter,
-  parser
+  parser,
 }:UseGetLezerNodesOptions){
   return useMemo(() => {
     const result: ReactNode[] = []
@@ -40,11 +41,12 @@ export function useGetLezerNodes({
 export function CodeBlock({ 
   code ,
   language,
+  parser: innerParser = parser,
   ...props
 }:CodeBlockProps) {
   const nodes = useGetLezerNodes({
     code,
-    parser
+    parser: innerParser
   })
 
   return <pre {...props}>

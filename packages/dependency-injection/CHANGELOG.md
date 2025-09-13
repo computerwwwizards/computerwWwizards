@@ -1,5 +1,17 @@
 # @computerwwwizards/dependency-injection
 
+## 1.3.0
+
+### Minor Changes
+
+- Added middleware
+
+## 1.2.0
+
+### Minor Changes
+
+- Updated readmes
+
 ## 1.1.1
 
 ### Patch Changes
