@@ -88,12 +88,10 @@ const container = new PrimitiveContainerWithUse<{
 // Create modular plugins
 const configPlugin = (c) => {
   c.bindTo('config', () => ({ apiUrl: 'https://api.example.com' }), 'singleton')
-  return c
 }
 
 const loggingPlugin = (c) => {
   c.bindTo('logger', () => ({ log: console.log }), 'singleton')
-  return c
 }
 
 const httpPlugin = (c) => {
@@ -103,7 +101,6 @@ const httpPlugin = (c) => {
       get: async (path) => fetch(`${config.apiUrl}${path}`).then(r => r.json())
     }
   })
-  return c
 }
 
 // Use plugins to configure the container
@@ -127,12 +124,10 @@ const container = new PreProcessDependencyContainerWithUse<{
 
 const databasePlugin = (c) => {
   c.bindTo('database', () => ({ query: (sql) => [] }), 'singleton')
-  return c
 }
 
 const loggingPlugin = (c) => {
   c.bindTo('logger', () => ({ log: console.log }), 'singleton')  
-  return c
 }
 
 const userServicePlugin = (c) => {
@@ -148,7 +143,6 @@ const userServicePlugin = (c) => {
       }
     })
   })
-  return c
 }
 
 // Chain plugins together
