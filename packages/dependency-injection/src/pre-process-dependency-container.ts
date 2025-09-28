@@ -1,10 +1,41 @@
-import { PrimitiveContainer } from "./primitive-container";
+import { ChildPrimitiveContainer, PrimitiveContainer } from "./primitive-container";
 import { BindOptions, IPreProcessDependencyContainer, PlainObject } from "./types";
 import { createWithUse } from "./create-mixin-with-use";
 
 export class PreProcessDependencyContainer <
   Register extends PlainObject
 > extends PrimitiveContainer<Register> 
+implements IPreProcessDependencyContainer<Register> 
+{
+  bind<
+    T extends keyof Register, 
+    M = unknown,  
+    Meta = any
+  >(identifier: T, options: BindOptions<Register, T, M,Meta>){
+    const {
+      provider,
+      resolveDependencies,
+      scope = 'singleton',
+      meta
+    } = options
+
+    return super.bindTo(identifier, (ctx)=>{
+      const resolvedDependencies = resolveDependencies?.(
+        ctx as IPreProcessDependencyContainer<Register>, 
+        meta
+      )!;
+
+      return provider(
+        resolvedDependencies, 
+        ctx as IPreProcessDependencyContainer<Register>, 
+      meta);
+    }, scope)
+  }
+}
+
+export class ChildPreProcessDependencyContainer <
+  Register extends PlainObject
+> extends ChildPrimitiveContainer<Register> 
 implements IPreProcessDependencyContainer<Register> 
 {
   bind<

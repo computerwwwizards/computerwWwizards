@@ -1,5 +1,6 @@
 import { createWithUse } from "./create-mixin-with-use";
-import { ContainerWithPlugins, IPrimitiveContainer, PlainObject } from "./types";
+import { IPrimitiveContainer, PlainObject } from "./types";
+
 
 export class PrimitiveContainer<
   ResultsbyIdentifier extends  PlainObject
@@ -57,3 +58,24 @@ export class PrimitiveContainer<
 
 export const PrimitiveContainerWithUse = createWithUse(PrimitiveContainer)
 
+export class ChildPrimitiveContainer <
+  OwnResultsbyIdentifier extends  PlainObject,
+  ParentResultsByIdentfier extends PlainObject = any
+> extends PrimitiveContainer<OwnResultsbyIdentifier>
+ implements 
+  IPrimitiveContainer<OwnResultsbyIdentifier>
+{
+  constructor(private parent?: ChildPrimitiveContainer<ParentResultsByIdentfier>){
+    super();
+  }
+
+  override get<T extends keyof (OwnResultsbyIdentifier & ParentResultsByIdentfier), R extends boolean>(
+    identifier: T, doNotThrowIIfNull?: R | undefined): (OwnResultsbyIdentifier & ParentResultsByIdentfier)[T] {
+    const maybeInstance = super.get(identifier, true) ?? this.parent?.get(identifier, true);
+
+    if(!doNotThrowIIfNull && !maybeInstance)
+      throw new Error(`Not found ${String(identifier)}`)
+
+    return maybeInstance
+  }
+} 

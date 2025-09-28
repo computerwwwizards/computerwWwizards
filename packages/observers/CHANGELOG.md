@@ -1,5 +1,11 @@
 # @computerwwwizards/observers
 
+## 1.3.0
+
+### Minor Changes
+
+- dep injection with parent resolution
+
 ## 1.2.0
 
 ### Minor Changes
