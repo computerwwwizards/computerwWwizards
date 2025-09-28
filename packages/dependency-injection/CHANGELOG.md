@@ -1,5 +1,11 @@
 # @computerwwwizards/dependency-injection
 
+## 1.4.0
+
+### Minor Changes
+
+- dep injection with parent resolution
+
 ## 1.3.0
 
 ### Minor Changes

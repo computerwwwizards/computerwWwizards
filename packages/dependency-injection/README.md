@@ -219,6 +219,44 @@ container.bind('serviceObj', {
 - **Modular plugin system**: Use the `use()` method to create reusable, composable dependency modules
 - **Flexible mixin pattern**: Create custom container classes with `createWithUse()`
 
+### Child containers: `ChildPrimitiveContainer`
+
+Create a child container that can fall back to a parent container for lookups. This is useful for scoping overrides (tests, feature flags, request-local data) while still inheriting common registrations from a shared parent.
+
+Behavior highlights:
+- Lookups first check the child container's own registry.
+- If not found, the child will attempt to read from the parent container (if provided).
+- Child values can override parent registrations.
+- If a value is not found on either side, the child will throw unless the optional `doNotThrowIfNull` flag is passed.
+
+```ts
+import { ChildPrimitiveContainer, PrimitiveContainerWithUse } from '@computerwwwizards/dependency-injection'
+
+// Parent with shared services
+const parent = new PrimitiveContainerWithUse<{
+  config: { apiUrl: string }
+  logger: { log: (msg: string) => void }
+}>()
+
+parent.bindTo('config', () => ({ apiUrl: 'https://api.example.com' }), 'singleton')
+parent.bindTo('logger', () => ({ log: console.log }), 'singleton')
+
+// Child that inherits from parent but can override
+const child = new ChildPrimitiveContainer(parent)
+
+// Child override
+child.bindTo('config', () => ({ apiUrl: 'https://staging.example.com' }), 'singleton')
+
+// lookups prefer child
+console.log(child.get('config').apiUrl) // 'https://staging.example.com'
+console.log(child.get('logger')) // falls back to parent and returns logger
+
+// optional lookup without throwing
+console.log(child.get('nonExisting' as any, true)) // undefined
+```
+
+For test isolation, create a child container with test-specific overrides and assert behavior without mutating the parent.
+
 ## Common patterns and tips
 
 ### Modular plugins for reusability
