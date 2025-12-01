@@ -2,6 +2,8 @@ export type Identifier = string | symbol | number
 
 export type PlainObject = Record<Identifier, any>
 
+export type Scope = 'singleton' | 'transient'
+
 export type ProviderFn<
   ResultsByIdentifier extends PlainObject, 
   Key extends keyof ResultsByIdentifier
@@ -19,16 +21,16 @@ export type ContainerWithPlugins<
 }
 
 export interface IPrimitiveContainer<ResultsByIdentifier extends PlainObject >{
-  bindTo<T extends keyof ResultsByIdentifier>(
-    identifier: T, 
-    provider: ProviderFn<ResultsByIdentifier, T>,
-    scope?: 'singleton' | 'transient'
+  bindTo<Identifier extends keyof ResultsByIdentifier>(
+    identifier: Identifier, 
+    provider: ProviderFn<ResultsByIdentifier, Identifier>,
+    scope?: Scope
   ): this;
-  get<T extends keyof ResultsByIdentifier, R extends boolean = false>(
-    identifier: T, 
+  get<Identifier extends keyof ResultsByIdentifier, R extends boolean = false>(
+    identifier: Identifier, 
     doNotThrowIfNull?: R,
     meta?: any
-  ): R extends true ? ResultsByIdentifier[T] | undefined : ResultsByIdentifier[T];
+  ): R extends true ? ResultsByIdentifier[Identifier] | undefined : ResultsByIdentifier[Identifier];
   unbind(identifier: keyof ResultsByIdentifier): this;
 }
 

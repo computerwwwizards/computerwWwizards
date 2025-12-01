@@ -1,5 +1,11 @@
 # @computerwwwizards/rsbuild-define-plugin
 
+## 1.0.2
+
+### Patch Changes
+
+- Update libs
+
 ## 1.0.1
 
 ### Patch Changes

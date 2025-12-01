@@ -1,5 +1,11 @@
 # @computerwwwizards/dependency-injection
 
+## 1.5.1
+
+### Patch Changes
+
+- Update libs
+
 ## 1.5.0
 
 ### Minor Changes
