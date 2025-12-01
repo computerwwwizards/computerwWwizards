@@ -13,11 +13,12 @@ describe('PreProcessDependencyContainer', () => {
 
   container.bind('sum', {
       scope: 'transient',
+      //@ts-expect-error
       resolveDependencies: createAutoResolveDepsInOrder([
         { identifier: 'firstNumber'},
         { identifier: 'secondNumber'}
       ]),
-      provider: (resolved: (number| undefined)[]) => {
+      provider: (resolved: [number, number]) => {
 
     const [first = 0, second = 0] = resolved
     return first + second

@@ -1,5 +1,15 @@
 # @computerwwwizards/dependency-injection
 
+## 1.5.0
+
+### Minor Changes
+
+- Refactor names
+
+### Patch Changes
+
+- Update libraries
+
 ## 1.4.0
 
 ### Minor Changes

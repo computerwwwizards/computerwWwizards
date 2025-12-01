@@ -66,9 +66,12 @@ implements IPreProcessDependencyContainer<Register>
 
 export const PreProcessDependencyContainerWithUse = createWithUse(PreProcessDependencyContainer)
 
-export const createAutoResolveDepsInOrder = <T extends PlainObject>(
-  deps: ({identifier:keyof T, dontThrowIfNull?: boolean})[]
-)=>(ctx:IPreProcessDependencyContainer<T>)=>{
+export const createAutoResolveDepsInOrder = <Register extends PlainObject>(
+  deps: ({
+    identifier:keyof Register, 
+    dontThrowIfNull?: boolean
+  })[]
+)=>(ctx:IPreProcessDependencyContainer<Register>)=>{
   return deps.map(({identifier, dontThrowIfNull}) => ctx.get(identifier, dontThrowIfNull))
 }
 

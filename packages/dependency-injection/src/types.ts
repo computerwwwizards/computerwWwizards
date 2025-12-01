@@ -3,8 +3,9 @@ export type Identifier = string | symbol | number
 export type PlainObject = Record<Identifier, any>
 
 export type ProviderFn<
-  ResultsByIdentifier extends PlainObject, T extends keyof ResultsByIdentifier
-> =  (ctx: IPrimitiveContainer<ResultsByIdentifier>)=>ResultsByIdentifier[T]
+  ResultsByIdentifier extends PlainObject, 
+  Key extends keyof ResultsByIdentifier
+> =  (ctx: IPrimitiveContainer<ResultsByIdentifier>)=>ResultsByIdentifier[Key]
 
 
 
