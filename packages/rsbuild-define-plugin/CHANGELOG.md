@@ -1,5 +1,11 @@
 # @computerwwwizards/rsbuild-define-plugin
 
+## 1.0.3
+
+### Patch Changes
+
+- uipdate lib
+
 ## 1.0.2
 
 ### Patch Changes

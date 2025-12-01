@@ -1,6 +1,6 @@
 {
   "name": "@computerwwwizards/rsbuild-define-plugin",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "type": "module",
   "publishConfig": {
     "exports": {
@@ -35,7 +35,7 @@
     "vitest": "^4.0.14"
   },
   "optionalDependencies": {
-    "@playwright/test": "^1.55.0",
+    "@playwright/test": "^1.57.0",
     "playwright": "^1.57.0"
   },
   "peerDependencies": {
