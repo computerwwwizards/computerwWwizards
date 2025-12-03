@@ -1,7 +1,7 @@
 {
   "license": "MIT",
   "name": "next-app",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
@@ -11,7 +11,7 @@
     "format": "biome format --write"
   },
   "dependencies": {
-    "next": "15.5.2",
+    "next": "16.0.7",
     "react": "19.2.0",
     "react-dom": "19.2.0"
   },

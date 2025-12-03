@@ -1,5 +1,11 @@
 # next-app
 
+## 0.2.0
+
+### Minor Changes
+
+- udpate next version
+
 ## 0.1.1
 
 ### Patch Changes
