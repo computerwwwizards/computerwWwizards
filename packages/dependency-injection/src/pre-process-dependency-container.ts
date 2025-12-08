@@ -66,17 +66,20 @@ implements IPreProcessDependencyContainer<Register>
 
 export class PreProcessDependencyContainerWithUse<T extends PlainObject> 
   extends PreProcessDependencyContainer<T> {
-    use(hanlder: (container: this)=>void){
-      hanlder(this);
-
+    use(...hanlders: ((container: this)=>void)[]){
+      hanlders
+        .map((handler)=>{handler(this)}, this)
+    
       return this;
     }
 }
 
 export class ChildPreProcessDependencyContainerWithUse<T extends PlainObject>
 extends ChildPreProcessDependencyContainer<T>{
-  use(handler: (container: this)=>void){
-    handler(this)
+  use(...handlers: ((container: this)=>void)[]){
+    handlers
+      .map((handler)=>handler(this), this)
+ 
 
     return this;
   }
