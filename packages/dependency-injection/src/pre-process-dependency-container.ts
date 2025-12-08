@@ -64,7 +64,23 @@ implements IPreProcessDependencyContainer<Register>
   }
 }
 
-export const PreProcessDependencyContainerWithUse = createWithUse(PreProcessDependencyContainer)
+export class PreProcessDependencyContainerWithUse<T extends PlainObject> 
+  extends PreProcessDependencyContainer<T> {
+    use(hanlder: (container: this)=>void){
+      hanlder(this);
+
+      return this;
+    }
+}
+
+export class ChildPreProcessDependencyContainerWithUse<T extends PlainObject>
+extends ChildPreProcessDependencyContainer<T>{
+  use(handler: (container: this)=>void){
+    handler(this)
+
+    return this;
+  }
+}
 
 export const createAutoResolveDepsInOrder = <Register extends PlainObject>(
   deps: ({

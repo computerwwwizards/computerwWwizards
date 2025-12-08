@@ -1,5 +1,11 @@
 # @computerwwwizards/dependency-injection
 
+## 1.6.0
+
+### Minor Changes
+
+- Created with use classes
+
 ## 1.5.1
 
 ### Patch Changes
