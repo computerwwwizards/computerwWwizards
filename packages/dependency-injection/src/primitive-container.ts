@@ -60,12 +60,12 @@ export const PrimitiveContainerWithUse = createWithUse(PrimitiveContainer)
 
 export class ChildPrimitiveContainer <
   OwnResultsbyIdentifier extends  PlainObject,
-  ParentResultsByIdentfier extends PlainObject = any
+  ParentResultsByIdentfier extends PlainObject
 > extends PrimitiveContainer<OwnResultsbyIdentifier>
  implements 
   IPrimitiveContainer<OwnResultsbyIdentifier>
 {
-  constructor(private parent?: ChildPrimitiveContainer<ParentResultsByIdentfier>){
+  constructor(private parent?: PrimitiveContainer<ParentResultsByIdentfier>){
     super();
   }
 
@@ -76,6 +76,6 @@ export class ChildPrimitiveContainer <
     if(!doNotThrowIIfNull && !maybeInstance)
       throw new Error(`Not found ${String(identifier)}`)
 
-    return maybeInstance
+    return maybeInstance!
   }
 } 

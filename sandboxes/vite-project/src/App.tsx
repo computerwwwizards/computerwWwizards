@@ -1,34 +1,106 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+import { createContext, use, useMemo, useState, type PropsWithChildren } from 'react'
+
 import './App.css'
+import setupGlobalContainer from './di-config/global'
+import setupChildChildAContainer from './di-config/global/children/childA'
+import type { fullContainerCtx } from './di-config/global/types'
+
+const {
+  DIcontext,
+  ChildContainerContext
+} = createContainer<fullContainerCtx>()
+
+function SubApp() {
+
+  return <ChildContainerContext setupCb={setupChildChildAContainer}/>
+}
+
+
+
+
+function createContainer<Container>() {
+
+  const DIcontext = createContext<Container>(null!)
+
+  function useGetContainer<R extends Container>() {
+    return use(DIcontext) as R
+  }
+
+  function useCreateChildContainer<
+    Parent extends Container, 
+    Child extends Container
+  >(setupCn: (parent: Parent) => Child) {
+    const parentContainer = useGetContainer<Parent>()
+
+    const childContainer = useMemo(() => {
+      return setupCn(parentContainer)
+    }, [setupCn, parentContainer])
+
+    return childContainer;
+  }
+
+  interface ContainerContextOwnProps<T> {
+    setupCb: (ctx?: T) => T;
+  }
+
+  interface ChildContainerContextOwnProps<Parent, Child>{
+    setupCb: (parent:Parent)=> Child
+  }
+
+  function ContainerContext<T extends Container>({
+    setupCb,
+    children
+  }: PropsWithChildren<ContainerContextOwnProps<T>>) {
+    const container = useMemo(() => {
+      return setupCb()
+    }, [setupCb])
+
+    return <DIcontext
+      value={container}>
+      {children}
+    </DIcontext>
+  }
+
+  function ChildContainerContext<Parent extends Container, Child extends Container>({
+    setupCb,
+    children
+  }:PropsWithChildren<ChildContainerContextOwnProps<Parent, Child>>){
+    const childContainer = useCreateChildContainer<Parent, Child>(setupCb);
+
+    return <DIcontext value={childContainer}>
+      {children}
+    </DIcontext>
+  }
+
+  return {
+    DIcontext,
+    useGetContainer,
+    useCreateChildContainer,
+    ContainerContext,
+    ChildContainerContext
+  }
+}
+
+
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [globalContainer] = useState(() => {
+    return setupGlobalContainer();
+  })
+
+  const onClick = () => {
+    const serviceA = globalContainer.get('serviceA')
+
+    if (serviceA)
+      console.log('Hello')
+  }
 
   return (
-    <>
+    <DIcontext value={globalContainer}>
       <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+        <button onClick={onClick} >Click me</button>
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    </DIcontext>
   )
 }
 

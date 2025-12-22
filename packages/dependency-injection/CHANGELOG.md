@@ -1,5 +1,11 @@
 # @computerwwwizards/dependency-injection
 
+## 1.7.0
+
+### Minor Changes
+
+- Updated di typing system
+
 ## 1.6.0
 
 ### Minor Changes

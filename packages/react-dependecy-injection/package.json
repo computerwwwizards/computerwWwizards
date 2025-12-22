@@ -1,0 +1,56 @@
+{
+  "name": "@computerwwwizards/react-dependecy-injection",
+  "version": "1.0.0",
+  "type": "module",
+  "publishConfig": {
+    "exports": {
+      ".": {
+        "types": "./dist/index.d.ts",
+        "import": "./dist/index.js"
+      }
+    }
+  },
+  "main": "./src/index.tsx",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "rslib build",
+    "build:storybook": "storybook build",
+    "check": "biome check --write",
+    "dev": "rslib build --watch",
+    "format": "biome format --write",
+    "lint": "eslint .",
+    "storybook": "storybook dev",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.3.2",
+    "@eslint/js": "^9.39.0",
+    "@rsbuild/core": "~1.6.12",
+    "@rsbuild/plugin-react": "^1.4.2",
+    "@rslib/core": "^0.18.3",
+    "@storybook/addon-docs": "^10.1.2",
+    "@storybook/addon-onboarding": "^10.1.2",
+    "@storybook/react": "^10.1.2",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.0",
+    "@types/react": "^19.2.7",
+    "eslint": "^9.39.0",
+    "globals": "^16.4.0",
+    "jsdom": "^26.1.0",
+    "react": "^19.2.1",
+    "storybook": "^10.1.2",
+    "storybook-addon-rslib": "^3.0.0",
+    "storybook-react-rsbuild": "^3.0.0",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.46.2",
+    "vitest": "^4.0.15"
+  },
+  "peerDependencies": {
+    "react": ">=19.2.1",
+    "react-dom": ">=19.2.1",
+    "@computerwwwizards/dependency-injection": "workspace:*"
+  },
+  "private": true
+}

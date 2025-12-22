@@ -1,5 +1,15 @@
 # vite-project
 
+## 0.1.0
+
+### Minor Changes
+
+- Updated di typing system
+
+### Patch Changes
+
+- React update
+
 ## 0.0.2
 
 ### Patch Changes

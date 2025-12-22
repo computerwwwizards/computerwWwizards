@@ -34,15 +34,15 @@ implements IPreProcessDependencyContainer<Register>
 }
 
 export class ChildPreProcessDependencyContainer <
-  Register extends PlainObject
-> extends ChildPrimitiveContainer<Register> 
-implements IPreProcessDependencyContainer<Register> 
+  OwnResultsbyIdentifier extends PlainObject, ParentResultsByIdentfier extends PlainObject
+> extends ChildPrimitiveContainer<OwnResultsbyIdentifier, ParentResultsByIdentfier> 
+implements IPreProcessDependencyContainer<OwnResultsbyIdentifier & ParentResultsByIdentfier> 
 {
   bind<
-    T extends keyof Register, 
+    T extends keyof (OwnResultsbyIdentifier & ParentResultsByIdentfier), 
     M = unknown,  
     Meta = any
-  >(identifier: T, options: BindOptions<Register, T, M,Meta>){
+  >(identifier: T, options: BindOptions<OwnResultsbyIdentifier & ParentResultsByIdentfier, T, M,Meta>){
     const {
       provider,
       resolveDependencies,
@@ -52,13 +52,13 @@ implements IPreProcessDependencyContainer<Register>
 
     return super.bindTo(identifier, (ctx)=>{
       const resolvedDependencies = resolveDependencies?.(
-        ctx as IPreProcessDependencyContainer<Register>, 
+        ctx as IPreProcessDependencyContainer<OwnResultsbyIdentifier & ParentResultsByIdentfier>, 
         meta
       )!;
 
       return provider(
         resolvedDependencies, 
-        ctx as IPreProcessDependencyContainer<Register>, 
+        ctx as IPreProcessDependencyContainer<OwnResultsbyIdentifier & ParentResultsByIdentfier>, 
       meta);
     }, scope)
   }
@@ -74,8 +74,8 @@ export class PreProcessDependencyContainerWithUse<T extends PlainObject>
     }
 }
 
-export class ChildPreProcessDependencyContainerWithUse<T extends PlainObject>
-extends ChildPreProcessDependencyContainer<T>{
+export class ChildPreProcessDependencyContainerWithUse<OwnResultsbyIdentifier extends PlainObject, ParentResultsByIdentfier extends PlainObject>
+extends ChildPreProcessDependencyContainer<OwnResultsbyIdentifier, ParentResultsByIdentfier>{
   use(...handlers: ((container: this)=>void)[]){
     handlers
       .map((handler)=>handler(this), this)
