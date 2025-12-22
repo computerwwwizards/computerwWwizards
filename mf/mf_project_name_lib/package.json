@@ -1,6 +1,7 @@
 {
   "name": "mf_project_name_lib",
   "version": "0.0.0",
+  "private": true,
   "type": "module",
   "exports": {
     ".": {
