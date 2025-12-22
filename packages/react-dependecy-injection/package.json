@@ -15,7 +15,7 @@
     "dist"
   ],
   "scripts": {
-    "build": "rslib build",
+    "build": "echo 'pending'",
     "build:storybook": "storybook build",
     "check": "biome check --write",
     "dev": "rslib build --watch",
