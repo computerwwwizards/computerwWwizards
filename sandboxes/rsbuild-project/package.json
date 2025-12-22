@@ -14,8 +14,8 @@
   "dependencies": {
     "@tanstack/react-router": "^1.141.1",
     "@tanstack/react-router-devtools": "^1.141.1",
-    "react": "^19.2.1",
-    "react-dom": "^19.2.0"
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3"
   },
   "devDependencies": {
     "@biomejs/biome": "2.3.8",

@@ -11,12 +11,12 @@
     "preview": "vite preview --host"
   },
   "dependencies": {
-    "react": "^19.2.1",
-    "react-dom": "^19.2.0"
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3"
   },
   "devDependencies": {
-    "@computerwwwizards/vite-define-plugin": "workspace:*",
     "@computerwwwizards/dependency-injection": "workspace:*",
+    "@computerwwwizards/vite-define-plugin": "workspace:*",
     "@eslint/js": "^9.33.0",
     "@types/react": "^19.1.10",
     "@types/react-dom": "^19.1.7",
