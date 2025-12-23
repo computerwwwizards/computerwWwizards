@@ -26,10 +26,45 @@ This package solves those problems by being minimal, explicit, and callback-driv
 - **`PrimitiveContainerWithUse`**: Same as above + `use()` method for plugins
 - **`PreProcessDependencyContainer`**: Advanced container with dependency resolution via `bind()`
 - **`PreProcessDependencyContainerWithUse`**: Advanced container + `use()` method for plugins  
+- **`BasicContainer`**: Enhanced plugin-aware container with lazy plugin registration and sub-plugin support (extends `PreProcessDependencyContainerWithUse`)
+- **`BasicChildContainer`**: Child scope with same plugin capabilities (extends `ChildPreProcessDependencyContainerWithUse`)
 - **`createWithUse()`**: Mixin function to add `use()` method to any container class
 - **`createAutoResolver`**: Resolve dependencies as a typed object (most common pattern)
 - **`createAutoResolveDepsInOrder`**: Resolve dependencies as an array in specified order
 - **Child containers**: `ChildPrimitiveContainer` for inheritance and testing
+
+## BasicContainer & BasicChildContainer
+
+The **`BasicContainer`** is the most feature-rich and recommended for most use cases. It extends `PreProcessDependencyContainerWithUse` and adds powerful plugin management capabilities:
+
+### Key Features
+
+- **Plugin variants/sub-plugins**: Register multiple implementations of a plugin (e.g., `mock`, `custom`, etc.) and switch between them
+- **Lazy plugin registration**: Register plugins with tags and apply them selectively
+- **Method chaining**: All methods return `this` for fluent API
+- **Centralized types**: Supports both simple plugins and plugins with sub-plugins seamlessly
+
+### BasicContainer Hierarchy
+
+```
+PrimitiveContainer
+  └── PreProcessDependencyContainer
+        └── PreProcessDependencyContainerWithUse
+              └── BasicContainer (✨ Enhanced plugin management)
+```
+
+### BasicChildContainer Hierarchy
+
+```
+ChildPrimitiveContainer
+  └── ChildPreProcessDependencyContainer
+        └── ChildPreProcessDependencyContainerWithUse
+              └── BasicChildContainer (✨ Same plugin capabilities as BasicContainer)
+```
+
+Both classes support the exact same plugin API, making them interchangeable in terms of how you register and manage plugins.
+
+
 
 ## Quick Start (Copy-paste friendly!)
 
@@ -120,6 +155,259 @@ container.use(configPlugin, loggingPlugin, httpPlugin)
 // Now everything is ready
 const client = container.get('httpClient')
 const data = await client.get('/users')
+```
+
+### BasicContainer: Advanced Plugin Management (Recommended)
+
+**`BasicContainer`** is the most powerful and recommended for production use. It adds lazy plugin registration, plugin variants (mocks, sub-plugins), and selective application:
+
+```ts
+import { BasicContainer } from '@computerwwwizards/dependency-injection'
+
+interface AppServices {
+  api: { fetch: (url: string) => Promise<any> }
+  logger: { log: (msg: string) => void }
+  cache: { get: (key: string) => any, set: (key: string, value: any) => void }
+}
+
+const container = new BasicContainer<AppServices>()
+
+// 1. SIMPLE PLUGINS (just a function)
+const loggerPlugin = (ctx: BasicContainer<AppServices>) => {
+  ctx.bindTo('logger', () => ({ log: console.log }), 'singleton')
+}
+
+// 2. PLUGINS WITH SUB-PLUGINS (e.g., mock variants)
+const apiPlugin = (ctx: BasicContainer<AppServices>) => {
+  ctx.bindTo('api', () => ({
+    fetch: async (url) => fetch(url).then(r => r.json())
+  }), 'singleton')
+}
+
+// Add a mock variant that works when testing
+apiPlugin.mock = (ctx: BasicContainer<AppServices>) => {
+  ctx.bindTo('api', () => ({
+    fetch: async (url) => ({ mocked: true, url })
+  }), 'singleton')
+}
+
+// Add a staging variant
+apiPlugin.staging = (ctx: BasicContainer<AppServices>) => {
+  ctx.bindTo('api', () => ({
+    fetch: async (url) => fetch(`https://staging.api.com${url}`).then(r => r.json())
+  }), 'singleton')
+}
+
+// 3. DIRECT USAGE - use plugins immediately
+container.use(loggerPlugin, apiPlugin)
+
+// 4. USE MOCKS - switch to mock variants (must be called before use())
+container.useMocks().use(apiPlugin)
+
+// 5. USE CUSTOM SUB-PLUGIN - switch to a specific variant
+container.useSubPlugin('staging').use(apiPlugin)
+
+// 6. LAZY REGISTRATION - register plugins with tags for later
+container
+  .registerPlugin(loggerPlugin)
+  .registerPlugin(apiPlugin, ['api', 'production'])
+
+// 7. APPLY PLUGINS - selectively apply by tag
+container.applyPlugins(['api'])  // Only applies apiPlugin
+
+// 8. APPLY ALL - apply everything that was registered
+container.applyPlugins()
+
+// Get your services
+const api = container.get('api')
+const result = await api.fetch('/users')
+```
+
+#### Real-World Pattern: Environment-based Variants
+
+```ts
+import { BasicContainer, createAutoResolver } from '@computerwwwizards/dependency-injection'
+
+interface Services {
+  config: { env: 'dev' | 'staging' | 'prod', apiUrl: string }
+  database: { query: (sql: string) => Promise<any> }
+  logger: { log: (msg: string) => void }
+}
+
+const container = new BasicContainer<Services>()
+
+// Configuration plugin
+const configPlugin = (ctx: BasicContainer<Services>) => {
+  ctx.bindTo('config', () => ({
+    env: process.env.NODE_ENV as any || 'dev',
+    apiUrl: process.env.API_URL || 'http://localhost:3000'
+  }), 'singleton')
+}
+
+// Database plugin with variants
+const databasePlugin = (ctx: BasicContainer<Services>) => {
+  // Production implementation
+  ctx.bindTo('database', () => ({
+    query: async (sql: string) => {
+      // Real database query
+      return []
+    }
+  }), 'singleton')
+}
+
+// Mock for testing
+databasePlugin.mock = (ctx: BasicContainer<Services>) => {
+  ctx.bindTo('database', () => ({
+    query: async (sql: string) => {
+      // Mock data
+      if (sql.includes('SELECT')) {
+        return [{ id: 1, name: 'Mock User' }]
+      }
+      return []
+    }
+  }), 'singleton')
+}
+
+// In-memory for development
+databasePlugin.dev = (ctx: BasicContainer<Services>) => {
+  const data: any[] = []
+  ctx.bindTo('database', () => ({
+    query: async (sql: string) => data
+  }), 'singleton')
+}
+
+// Logger plugin with variants
+const loggerPlugin = (ctx: BasicContainer<Services>) => {
+  ctx.bind('logger', {
+    resolveDependencies: createAutoResolver([{ identifier: 'config' }]),
+    provider: (deps) => ({
+      log: (msg: string) => console.log(`[${deps.config.env}] ${msg}`)
+    }),
+    scope: 'singleton'
+  })
+}
+
+// Choose environment
+const env = process.env.NODE_ENV || 'dev'
+
+if (env === 'test') {
+  container.useMocks()  // Use all .mock variants
+} else if (env === 'dev') {
+  container.useSubPlugin('dev')  // Use all .dev variants
+}
+
+// Register and apply
+container
+  .registerPlugin(configPlugin, ['config'])
+  .registerPlugin(databasePlugin, ['database'])
+  .registerPlugin(loggerPlugin, ['logger'])
+  .applyPlugins()  // Apply everything
+
+const logger = container.get('logger')
+logger.log('Application started')
+```
+
+### BasicChildContainer: Inheritance & Testing
+
+`BasicChildContainer` extends the parent container while maintaining all plugin capabilities. Perfect for testing:
+
+```ts
+import { BasicContainer, BasicChildContainer, createAutoResolver } from '@computerwwwizards/dependency-injection'
+
+interface ParentServices {
+  config: { appName: string, version: string }
+  logger: { log: (msg: string) => void }
+  database: { query: (sql: string) => Promise<any> }
+}
+
+interface ChildServices {
+  userService: { findUser: (id: string) => Promise<any> }
+  cache: { get: (key: string) => any }
+}
+
+// Parent container (production setup)
+const parent = new BasicContainer<ParentServices>()
+parent.registerPlugin((ctx) => {
+  ctx.bindTo('config', () => ({
+    appName: 'MyApp',
+    version: '1.0.0'
+  }), 'singleton')
+}, ['config'])
+
+// Create child container for a feature/module
+const child = parent.createScope<ChildServices>()
+
+// Child has access to parent services AND its own services
+const userServicePlugin = (ctx: BasicChildContainer<ParentServices, ChildServices>) => {
+  ctx.bind('userService', {
+    resolveDependencies: createAutoResolver([
+      { identifier: 'database' },
+      { identifier: 'config' }
+    ]),
+    provider: (deps) => ({
+      findUser: async (id: string) => {
+        // Access parent's database and config
+        const result = await deps.database.query(`SELECT * FROM users WHERE id = ?`)
+        return result[0] || null
+      }
+    }),
+    scope: 'singleton'
+  })
+}
+
+child.registerPlugin(userServicePlugin).applyPlugins()
+
+// Override parent's database with test mock
+child.bindTo('database', () => ({
+  query: async (sql: string) => [{ id: '1', name: 'Test User' }]
+}), 'singleton')
+
+// Now child can use parent services with overrides
+const userService = child.get('userService')
+const user = await userService.findUser('1')  // Uses mocked database
+```
+
+#### Testing Pattern: Container Isolation
+
+```ts
+import { BasicContainer } from '@computerwwwizards/dependency-injection'
+
+// Your app's main container
+const createAppContainer = () => {
+  const container = new BasicContainer<AppServices>()
+  container
+    .registerPlugin(loggerPlugin)
+    .registerPlugin(databasePlugin)
+    .registerPlugin(apiPlugin)
+    .applyPlugins()
+  return container
+}
+
+// Test setup with mocks
+const createTestContainer = () => {
+  const container = new BasicContainer<AppServices>()
+  
+  // Use mock variants
+  container.useMocks()
+  
+  // Register with mocks
+  container
+    .registerPlugin(loggerPlugin)
+    .registerPlugin(databasePlugin)
+    .registerPlugin(apiPlugin)
+    .applyPlugins()
+  
+  return container
+}
+
+// In your test
+it('should fetch user', async () => {
+  const container = createTestContainer()
+  const api = container.get('api')
+  
+  const result = await api.fetch('/users/1')
+  expect(result).toEqual({ mocked: true, url: '/users/1' })
+})
 ```
 
 ### Advanced: PreProcessDependencyContainer with Plugins

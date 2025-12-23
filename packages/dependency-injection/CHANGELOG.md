@@ -1,5 +1,11 @@
 # @computerwwwizards/dependency-injection
 
+## 1.8.1
+
+### Patch Changes
+
+- updated readme
+
 ## 1.8.0
 
 ### Minor Changes
