@@ -6,3 +6,5 @@ export * from './types'
 export * from './pre-process-dependency-container'
 
 export * from './create-mixin-with-use'
+
+export * from './basic-container'

@@ -1,5 +1,12 @@
 # @computerwwwizards/dependency-injection
 
+## 1.8.0
+
+### Minor Changes
+
+- Added basic container and its child version, based on the "withUse" version of containers
+  this improves the plugin registration and have a lazy modle of execution
+
 ## 1.7.0
 
 ### Minor Changes
