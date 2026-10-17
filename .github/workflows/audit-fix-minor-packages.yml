@@ -1,0 +1,109 @@
+name: 🔒 Secure Repository Audit Fixer
+
+on:
+  schedule:
+    - cron: '0 0 * * 1'
+  workflow_dispatch:
+
+jobs:
+  # --- JOB 1: SECURELY AUDIT AND RESOLVE (READ-ONLY) ---
+  audit-and-fix:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      CHANGED: ${{ steps.check_changes.outputs.CHANGED }}
+    
+    steps:
+      - name: Superficial Checkout (Configs Only)
+        uses: actions/checkout@v7
+        with:
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            **/package.json
+            **/pnpm-lock.yaml
+            pnpm-workspace.yaml
+
+      - name: Auto-Detect Environment Manifests
+        uses: pnpm/setup@v3
+        with:
+          install: false
+          cache: true
+
+      - name: Run Bulletproof Audit Fix
+        run: |
+          pnpm audit -r --fix=update \
+            --no-frozen-lockfile \
+            --ignore-registry-errors \
+            --ignore-unfixable \
+            --audit-level=high
+
+      - name: Check for Modifications
+        id: check_changes
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "CHANGED=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "CHANGED=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Upload Patched Files
+        if: steps.check_changes.outputs.CHANGED == 'true'
+        uses: actions/upload-artifact@v7
+        with:
+          name: patched-manifests
+          path: |
+            **/package.json
+            **/pnpm-lock.yaml
+            pnpm-workspace.yaml
+
+  # --- JOB 2: PUSH ATOMIC COMMIT VIA API (ZERO CLONE, ZERO SHA FETCHING) ---
+  create-pull-request:
+    needs: audit-and-fix
+    if: needs.audit-and-fix.outputs.CHANGED == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+
+    steps:
+      - name: Download Patched Files
+        uses: actions/download-artifact@v7
+        with:
+          name: patched-manifests
+
+      - name: Push Atomic Tree & Open PR via GitHub API
+        run: |
+          BRANCH="security/pnpm-audit-fix-$GITHUB_RUN_ID"
+
+          # 1. Build a JSON tree array of all patched files (NO old file SHA needed!)
+          TREE_JSON=$(find . -type f \( -name "package.json" -o -name "pnpm-lock.yaml" -o -name "pnpm-workspace.yaml" \) | while read -r file; do
+            jq -n \
+              --arg path "${file#./}" \
+              --rawfile content "$file" \
+              '{path: $path, mode: "100644", type: "blob", content: $content}'
+          done | jq -s --arg base_tree "$GITHUB_SHA" '{base_tree: $base_tree, tree: .}')
+
+          # 2. Send the tree to GitHub's DB using native $GITHUB_SHA
+          NEW_TREE_SHA=$(echo "$TREE_JSON" | gh api "repos/$GITHUB_REPOSITORY/git/trees" --input - --jq '.sha')
+
+          # 3. Create a single atomic commit on GitHub's servers
+          NEW_COMMIT_SHA=$(gh api "repos/$GITHUB_REPOSITORY/git/commits" -X POST \
+            -f message="chore: automated pnpm security patch updates" \
+            -f tree="$NEW_TREE_SHA" \
+            -f "parents[]=$GITHUB_SHA" \
+            --jq '.sha')
+
+          # 4. Point the new branch directly at our new commit
+          gh api "repos/$GITHUB_REPOSITORY/git/refs" -X POST \
+            -f ref="refs/heads/$BRANCH" \
+            -f sha="$NEW_COMMIT_SHA"
+
+          # 5. Open the Pull Request
+          gh api "repos/$GITHUB_REPOSITORY/pulls" -X POST \
+            -f title="🔒 Automated Security Dependency Updates (pnpm audit)" \
+            -f body="Generated via zero-clone Git Tree REST API in a single atomic commit." \
+            -f head="$BRANCH" \
+            -f base="${GITHUB_REF_NAME}"
