@@ -6,3 +6,8 @@ packages:
 
 overrides:
   schema-utils: "4.5.0"
+
+allowBuilds:
+  - "@swc/core"
+  - "core-js"
+  - "esbuild"
