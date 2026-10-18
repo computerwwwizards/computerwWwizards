@@ -3,3 +3,6 @@ packages:
   - 'packages/*'
   - 'sandboxes/*'
   - 'mf/*'
+
+overrides:
+  schema-utils: "4.5.0"
