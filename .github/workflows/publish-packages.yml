@@ -10,22 +10,12 @@ jobs:
       contents: read
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: pnpm/setup@c9883cc79df532ad1a7b81bf9ab944ceb090d65c
         with:
-          node-version: 24
-          registry-url: 'https://registry.npmjs.org'
-          cache: 'pnpm'
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-      - name: Install dependencies
-        run: pnpm install
+          cache: true
 
       - name: Build all packages
         run: pnpm --filter "./packages/**" run build 
