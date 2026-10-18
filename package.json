@@ -19,5 +19,11 @@
     "@changesets/cli": "^2.29.6",
     "plop": "^4.0.4",
     "tsx": "^4.20.5"
+  },
+  "devEngines": {
+    "runtime": {
+      "name": "node",
+      "version": "^24.0.0"
+    }
   }
 }
