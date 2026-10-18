@@ -25,7 +25,7 @@ jobs:
       - name: Publish to npm
         
         run: |
-          pnpm publish -r --access public --no-git-checks
+          pnpm stage publish -r --access public --no-git-checks
 
       - name: Summary
         run: |
