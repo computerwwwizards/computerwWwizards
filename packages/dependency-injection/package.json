@@ -5,7 +5,7 @@
   "type": "module",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com",
+    "url": "https://github.com/computerwwwizards/computerwWwizards",
     "directory": "packages/dependency-injection"
   },
   "publishConfig": {
