@@ -8,6 +8,6 @@ overrides:
   schema-utils: "4.5.0"
 
 allowBuilds:
-  - "@swc/core"
-  - "core-js"
-  - "esbuild"
+  "@swc/core": true
+  "core-js": true
+  "esbuild": true
