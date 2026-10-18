@@ -33,7 +33,6 @@ jobs:
       - name: Run Bulletproof Audit Fix
         run: |
           pnpm audit -r --fix=update \
-            --no-frozen-lockfile \
             --ignore-registry-errors \
             --ignore-unfixable \
             --audit-level=high
